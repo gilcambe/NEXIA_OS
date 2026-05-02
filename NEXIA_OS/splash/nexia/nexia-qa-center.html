@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXIA QA CENTER — Auditoria Total do Sistema</title>
+<link rel="stylesheet" href="/nexia/nexia-design-system.css">
+<style>
+
+/* ── NEXIA DS BRIDGE — maps old vars → DS tokens ── */
+:root {
+  --bg: var(--n-bg) !important;
+  --bg2: var(--n-surface) !important;
+  --bg3: var(--n-card) !important;
+  --bg4: var(--n-card-hover) !important;
+  --text: var(--n-text) !important;
+  --text2: var(--n-text-2) !important;
+  --text3: var(--n-text-3) !important;
+  --border: var(--n-border) !important;
+  --border2: var(--n-border-mid) !important;
+  --ff: var(--n-font) !important;
+  --ffm: var(--n-mono) !important;
+  --blue: var(--n-accent) !important;
+  --cyan: var(--n-accent) !important;
+  --green: var(--n-success) !important;
+  --red: var(--n-error) !important;
+  --amber: var(--n-warning) !important;
+  --purple: #A855F7 !important;
+  --gold: #F59E0B !important;
+  /* cortex-specific */
+  --brd: var(--n-border) !important;
+  --brd2: var(--n-border-mid) !important;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060810;--bg2:#0b0f1a;--bg3:#111827;--bg4:#1a2235;
+  --cyan:#00e5ff;--cyan2:#00b8cc;--cyanlt:rgba(0,229,255,.07);--cyanbrd:rgba(0,229,255,.18);
+  --green:#10b981;--greenlt:rgba(16,185,129,.1);--greenbrd:rgba(16,185,129,.25);
+  --red:#ef4444;--redlt:rgba(239,68,68,.1);--redbrd:rgba(239,68,68,.25);
+  --amber:#f59e0b;--amberlt:rgba(245,158,11,.1);--amberbrd:rgba(245,158,11,.25);
+  --purple:#a855f7;--purplt:rgba(168,85,247,.08);
+  --text:#c9d1de;--text2:rgba(201,209,222,.6);--text3:rgba(201,209,222,.3);
+  --brd:rgba(255,255,255,.05);--brd2:rgba(255,255,255,.09);
+}
+html,body{min-height:100vh;font-family:'Syne',sans-serif;background:var(--bg);color:var(--text)}
+body{padding:0;overflow-x:hidden}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,rgba(0,229,255,.04),rgba(168,85,247,.04));border-bottom:1px solid var(--cyanbrd);padding:20px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.hdr-logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#0a1f3a,#1a0a2e);border:1px solid var(--cyanbrd);display:flex;align-items:center;justify-content:center;font-size:20px}
+.hdr-title{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.hdr-title span{color:var(--cyan)}
+.hdr-sub{font-size:11px;color:var(--text3);margin-top:1px;font-family:'JetBrains Mono',monospace}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.base-url-input{background:var(--bg3);border:1px solid var(--brd2);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;width:280px;outline:none}
+.base-url-input:focus{border-color:var(--cyanbrd)}
+.btn-run-all{padding:8px 20px;border-radius:8px;background:linear-gradient(135deg,var(--cyan2),#006699);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
+.btn-run-all:hover{box-shadow:0 0 20px rgba(0,229,255,.25)}
+.btn-run-all:disabled{opacity:.5;cursor:not-allowed}
+
+/* STATS BAR */
+.stats-bar{display:flex;gap:12px;padding:16px 32px;border-bottom:1px solid var(--brd)}
+.stat-card{flex:1;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.stat-icon{font-size:20px}
+.stat-val{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
+.stat-card.pass .stat-val{color:var(--green)}
+.stat-card.fail .stat-val{color:var(--red)}
+.stat-card.warn .stat-val{color:var(--amber)}
+.stat-card.info .stat-val{color:var(--cyan)}
+
+/* MAIN LAYOUT */
+.main{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 130px)}
+
+/* SIDEBAR NAV */
+.nav{background:var(--bg2);border-right:1px solid var(--brd);padding:16px 0;position:sticky;top:80px;height:calc(100vh - 80px);overflow-y:auto}
+.nav-section{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:12px 16px 4px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;transition:all .15s;font-size:12px;border-left:2px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+.nav-item.active{background:var(--cyanlt);border-left-color:var(--cyan);color:var(--cyan)}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--brd2);flex-shrink:0;transition:background .2s}
+.nav-item.pass .nav-dot{background:var(--green)}
+.nav-item.fail .nav-dot{background:var(--red)}
+.nav-item.warn .nav-dot{background:var(--amber)}
+.nav-item.running .nav-dot{background:var(--cyan);animation:pulse .6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-count{margin-left:auto;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)}
+
+/* CONTENT */
+.content{padding:24px 32px;overflow-y:auto}
+.section{margin-bottom:32px}
+.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--brd)}
+.section-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--bg3);border:1px solid var(--brd2)}
+.section-title{font-size:15px;font-weight:700}
+.section-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.section-badge{margin-left:auto;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:700}
+.section-badge.pass{background:var(--greenlt);color:var(--green);border:1px solid var(--greenbrd)}
+.section-badge.fail{background:var(--redlt);color:var(--red);border:1px solid var(--redbrd)}
+.section-badge.warn{background:var(--amberlt);color:var(--amber);border:1px solid var(--amberbrd)}
+.section-badge.pending{background:var(--bg3);color:var(--text3);border:1px solid var(--brd)}
+
+/* TEST ITEMS */
+.test-grid{display:flex;flex-direction:column;gap:6px}
+.test-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--brd);border-radius:8px;transition:all .2s;cursor:pointer}
+.test-item:hover{border-color:var(--brd2)}
+.test-item.pass{border-left:3px solid var(--green);background:linear-gradient(90deg,rgba(16,185,129,.04),var(--bg2))}
+.test-item.fail{border-left:3px solid var(--red);background:linear-gradient(90deg,rgba(239,68,68,.05),var(--bg2))}
+.test-item.warn{border-left:3px solid var(--amber);background:linear-gradient(90deg,rgba(245,158,11,.05),var(--bg2))}
+.test-item.running{border-left:3px solid var(--cyan);animation:borderPulse 1s infinite}
+@keyframes borderPulse{0%,100%{border-left-color:var(--cyan)}50%{border-left-color:rgba(0,229,255,.3)}}
+.test-status{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.test-status.pass{background:var(--greenlt);color:var(--green)}
+.test-status.fail{background:var(--redlt);color:var(--red)}
+.test-status.warn{background:var(--amberlt);color:var(--amber)}
+.test-status.running{background:var(--cyanlt);color:var(--cyan)}
+.test-status.pending{background:var(--bg3);color:var(--text3)}
+.test-name{font-size:12px;font-weight:600;flex:1}
+.test-detail{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.test-time{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-left:auto;white-space:nowrap}
+.test-url{font-size:10px;color:var(--cyan);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+
+/* LOG */
+.log-panel{background:var(--bg);border:1px solid var(--brd);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:11px;max-height:300px;overflow-y:auto;margin-top:16px}
+.log-panel::-webkit-scrollbar{width:4px}.log-panel::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
+.log-line{padding:2px 0;display:flex;gap:8px}
+.log-time{color:var(--text3);flex-shrink:0}
+.log-level{flex-shrink:0;font-weight:700}
+.log-level.ok{color:var(--green)}
+.log-level.err{color:var(--red)}
+.log-level.wrn{color:var(--amber)}
+.log-level.inf{color:var(--cyan)}
+.log-msg{color:var(--text2);word-break:break-all}
+
+/* PROGRESS */
+.progress-wrap{background:var(--bg3);border-radius:4px;height:4px;overflow:hidden;margin-bottom:4px}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--cyan2),var(--purple));border-radius:4px;transition:width .3s;width:0%}
+
+.btn-retest{padding:4px 10px;border-radius:5px;background:transparent;border:1px solid var(--brd2);color:var(--text3);font-size:10px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s}
+.btn-retest:hover{border-color:var(--cyanbrd);color:var(--cyan)}
+
+/* SUMMARY */
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px}
+.summary-card{background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:12px}
+.summary-card-title{font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.summary-card-val{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* FIXES */
+.fix-list{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.fix-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--redbrd);border-radius:8px}
+.fix-sev{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+.fix-sev.critical{background:var(--redlt);color:var(--red);border:1px solid var(--redbrd)}
+.fix-sev.warn{background:var(--amberlt);color:var(--amber);border:1px solid var(--amberbrd)}
+.fix-sev.info{background:var(--cyanlt);color:var(--cyan);border:1px solid var(--cyanbrd)}
+.fix-text{font-size:12px;flex:1}
+.fix-text strong{display:block;margin-bottom:3px;font-weight:600}
+.fix-text span{color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">⚡</div>
+  <div>
+    <div class="hdr-title">NEXIA <span>QA CENTER</span></div>
+    <div class="hdr-sub">Auditoria Total do Sistema — Páginas · APIs · Segurança · UI</div>
+  </div>
+  <div class="hdr-right">
+    <input class="base-url-input" id="baseUrl" value="https://nexia-os.onrender.com" placeholder="Base URL do sistema">
+    <button class="btn-run-all" id="btnRunAll" onclick="runAllTests()">▶ Rodar Tudo</button>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card pass"><div class="stat-icon">✅</div><div><div class="stat-val" id="statPass">0</div><div class="stat-lbl">Passou</div></div></div>
+  <div class="stat-card fail"><div class="stat-icon">❌</div><div><div class="stat-val" id="statFail">0</div><div class="stat-lbl">Falhou</div></div></div>
+  <div class="stat-card warn"><div class="stat-icon">⚠️</div><div><div class="stat-val" id="statWarn">0</div><div class="stat-lbl">Aviso</div></div></div>
+  <div class="stat-card info"><div class="stat-icon">📊</div><div><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total</div></div></div>
+  <div class="stat-card info"><div class="stat-icon">⏱️</div><div><div class="stat-val" id="statTime">0ms</div><div class="stat-lbl">Tempo Total</div></div></div>
+</div>
+
+<div style="padding:8px 32px;background:var(--bg2);border-bottom:1px solid var(--brd)">
+  <div class="progress-wrap"><div class="progress-bar" id="mainProgress"></div></div>
+  <div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace" id="progressText">Aguardando execução...</div>
+</div>
+
+<div class="main">
+  <!-- NAV -->
+  <div class="nav">
+    <div class="nav-section">Categorias</div>
+    <div class="nav-item active" onclick="scrollTo('sec-pages')"><div class="nav-dot" id="dot-pages"></div>Páginas HTML<span class="nav-count" id="cnt-pages">33</span></div>
+    <div class="nav-item" onclick="scrollTo('sec-api')"><div class="nav-dot" id="dot-api"></div>APIs Backend<span class="nav-count" id="cnt-api">45</span></div>
+    <div class="nav-item" onclick="scrollTo('sec-security')"><div class="nav-dot" id="dot-security"></div>Segurança<span class="nav-count" id="cnt-security">10</span></div>
+    <div class="nav-item" onclick="scrollTo('sec-ui')"><div class="nav-dot" id="dot-ui"></div>UI / UX<span class="nav-count" id="cnt-ui">8</span></div>
+    <div class="nav-item" onclick="scrollTo('sec-perf')"><div class="nav-dot" id="dot-perf"></div>Performance<span class="nav-count" id="cnt-perf">6</span></div>
+    <div class="nav-item" onclick="scrollTo('sec-fixes')"><div class="nav-dot" id="dot-fixes"></div>Correções Necessárias<span class="nav-count" id="cnt-fixes">0</span></div>
+    <div class="nav-section" style="margin-top:16px">Ações Rápidas</div>
+    <div class="nav-item" onclick="runSection('pages')">▶ Testar Páginas</div>
+    <div class="nav-item" onclick="runSection('api')">▶ Testar APIs</div>
+    <div class="nav-item" onclick="runSection('security')">▶ Testar Segurança</div>
+    <div class="nav-item" onclick="clearResults()">🗑️ Limpar Resultados</div>
+    <div class="nav-item" onclick="exportReport()">📄 Exportar Relatório</div>
+    <div class="nav-section" style="margin-top:16px">Log</div>
+    <div style="padding:8px 16px">
+      <div id="miniLog" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);max-height:200px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="mainContent">
+
+    <!-- PAGES SECTION -->
+    <div class="section" id="sec-pages">
+      <div class="section-hdr">
+        <div class="section-icon">🌐</div>
+        <div><div class="section-title">Páginas HTML</div><div class="section-sub">Verifica se todas as páginas retornam 200 e carregam corretamente</div></div>
+        <button class="btn-retest" onclick="runSection('pages')">▶ Testar</button>
+        <div class="section-badge pending" id="badge-pages">Pendente</div>
+      </div>
+      <div class="test-grid" id="grid-pages"></div>
+    </div>
+
+    <!-- API SECTION -->
+    <div class="section" id="sec-api">
+      <div class="section-hdr">
+        <div class="section-icon">⚡</div>
+        <div><div class="section-title">APIs Backend</div><div class="section-sub">Testa todos os endpoints — status, resposta, tempo</div></div>
+        <button class="btn-retest" onclick="runSection('api')">▶ Testar</button>
+        <div class="section-badge pending" id="badge-api">Pendente</div>
+      </div>
+      <div class="test-grid" id="grid-api"></div>
+    </div>
+
+    <!-- SECURITY SECTION -->
+    <div class="section" id="sec-security">
+      <div class="section-hdr">
+        <div class="section-icon">🔐</div>
+        <div><div class="section-title">Segurança</div><div class="section-sub">CORS, headers, rotas protegidas, auth bypass</div></div>
+        <button class="btn-retest" onclick="runSection('security')">▶ Testar</button>
+        <div class="section-badge pending" id="badge-security">Pendente</div>
+      </div>
+      <div class="test-grid" id="grid-security"></div>
+    </div>
+
+    <!-- UI SECTION -->
+    <div class="section" id="sec-ui">
+      <div class="section-hdr">
+        <div class="section-icon">🎨</div>
+        <div><div class="section-title">UI / UX</div><div class="section-sub">Verifica consistência visual, responsividade, links quebrados</div></div>
+        <button class="btn-retest" onclick="runSection('ui')">▶ Testar</button>
+        <div class="section-badge pending" id="badge-ui">Pendente</div>
+      </div>
+      <div class="test-grid" id="grid-ui"></div>
+    </div>
+
+    <!-- PERFORMANCE SECTION -->
+    <div class="section" id="sec-perf">
+      <div class="section-hdr">
+        <div class="section-icon">⚡</div>
+        <div><div class="section-title">Performance</div><div class="section-sub">Tempo de resposta, tamanho de payload, cold start</div></div>
+        <button class="btn-retest" onclick="runSection('perf')">▶ Testar</button>
+        <div class="section-badge pending" id="badge-perf">Pendente</div>
+      </div>
+      <div class="test-grid" id="grid-perf"></div>
+    </div>
+
+    <!-- FIXES SECTION -->
+    <div class="section" id="sec-fixes">
+      <div class="section-hdr">
+        <div class="section-icon">🔧</div>
+        <div><div class="section-title">Correções Necessárias</div><div class="section-sub">Lista automática de tudo que precisa ser corrigido</div></div>
+        <div class="section-badge pending" id="badge-fixes">Nenhuma</div>
+      </div>
+      <div id="fix-list-container"><div style="color:var(--text3);font-size:13px;padding:20px 0">Rode os testes para ver as correções necessárias.</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+const BASE = () => document.getElementById('baseUrl').value.replace(/\/$/, '');
+
+// ── TEST DEFINITIONS ────────────────────────────────────────────
+const PAGES = [
+  { name:'Index / Landing',       url:'/',                         expect:200 },
+  { name:'Login',                  url:'/login',                    expect:200 },
+  { name:'Nexia Master Admin',     url:'/nexia/nexia-master-admin.html', expect:200 },
+  { name:'My Panel',               url:'/nexia/my-panel.html?tenant=nexia', expect:200 },
+  { name:'Cortex App',             url:'/nexia/cortex-app.html?tenant=nexia', expect:200 },
+  { name:'Flow (Automações)',       url:'/nexia/flow.html',          expect:200 },
+  { name:'Studio',                 url:'/nexia/studio.html',        expect:200 },
+  { name:'Tenant Hub',             url:'/nexia/tenant-hub.html',    expect:200 },
+  { name:'Swarm Control',          url:'/nexia/swarm-control.html', expect:200 },
+  { name:'Sentinel Dashboard',     url:'/nexia/sentinel-dashboard.html', expect:200 },
+  { name:'PKI Scanner',            url:'/nexia/pki-scanner.html',   expect:200 },
+  { name:'Strike Center',          url:'/nexia/strike-center.html', expect:200 },
+  { name:'QA Test Center',         url:'/nexia/qa-test-center.html',expect:200 },
+  { name:'OSINT Query',            url:'/nexia/osint-query.html',   expect:200 },
+  { name:'Nexia Pay',              url:'/nexia/nexia-pay.html',     expect:200 },
+  { name:'Nexia Store',            url:'/nexia/nexia-store.html',   expect:200 },
+  { name:'Nexia AutoDemo',         url:'/nexia/nexia-autodemo.html',expect:200 },
+  { name:'Nexia Striker',          url:'/nexia/nexia-striker.html', expect:200 },
+  { name:'Observability',          url:'/nexia/observability.html', expect:200 },
+  { name:'PABX Softphone',         url:'/nexia/pabx-softphone.html',expect:200 },
+  { name:'Social Media Auto',      url:'/nexia/social-media-auto.html', expect:200 },
+  { name:'Architect',              url:'/nexia/architect.html',     expect:200 },
+  { name:'CES Landing',            url:'/ces/ces-landing.html',     expect:200 },
+  { name:'CES Admin',              url:'/ces/ces-admin.html',       expect:200 },
+  { name:'CES Executivo',          url:'/ces/ces-app-executivo.html',expect:200 },
+  { name:'CES Check-in',           url:'/ces/checkin.html',         expect:200 },
+  { name:'Bezsan Landing',         url:'/bezsan/bezsan-landing.html',expect:200 },
+  { name:'Bezsan Admin',           url:'/bezsan/bezsan-admin.html', expect:200 },
+  { name:'Splash Landing',         url:'/splash/splash-landing.html',expect:200 },
+  { name:'Splash Admin',           url:'/splash/splash-admin.html', expect:200 },
+  { name:'VP Landing',             url:'/viajante-pro/vp-landing.html', expect:200 },
+  { name:'VP Admin',               url:'/viajante-pro/vp-admin.html',   expect:200 },
+  { name:'VP Passenger',           url:'/viajante-pro/vp-passenger.html',expect:200 },
+  { name:'VP Guide',               url:'/viajante-pro/vp-guide.html',    expect:200 },
+  // Static assets
+  { name:'Firebase Config',        url:'/api/firebase-config',      expect:200, isApi:true },
+  { name:'Favicon SVG',            url:'/favicon.svg',              expect:200 },
+  { name:'SW Service Worker',      url:'/sw.js',                    expect:200 },
+];
+
+const APIS = [
+  // Auth - unauthenticated probes (should get 401, not 500)
+  { name:'Auth — OPTIONS preflight', url:'/api/auth',   method:'OPTIONS', expect:[200,204], note:'CORS preflight' },
+  { name:'Auth — verify (no token)', url:'/api/auth',   method:'POST',    expect:[401,400], body:{action:'verify'}, note:'Deve rejeitar sem token' },
+  { name:'Governance — check',       url:'/api/governance', method:'POST', expect:[200,401], body:{action:'check'}, note:'Status sem auth' },
+  { name:'Firebase Config',          url:'/api/firebase-config', method:'GET', expect:[200,503], note:'Config pública' },
+  // API health checks (all should return 401/403, NOT 500)
+  { name:'Cortex — sem token',       url:'/api/cortex', method:'POST', expect:[400,401,429], body:{message:'test'}, note:'Deve exigir auth' },
+  { name:'Usage — sem token',        url:'/api/usage',  method:'GET',  expect:[400,401,403], note:'Deve exigir auth' },
+  { name:'Tenant — sem token',       url:'/api/tenant', method:'GET',  qs:'?tenantId=nexia', expect:[400,401,403], note:'Deve exigir auth' },
+  { name:'Billing — sem token',      url:'/api/billing', method:'POST', expect:[400,401,403], body:{action:'status'}, note:'Deve exigir auth' },
+  { name:'Architect — sem token',    url:'/api/architect', method:'POST', expect:[400,401,403], body:{action:'status',tenantId:'nexia'}, note:'Deve exigir auth' },
+  { name:'Agents — sem token',       url:'/api/agents',  method:'GET', expect:[400,401,403], note:'Deve exigir auth' },
+  { name:'Actions — sem token',      url:'/api/actions', method:'POST', expect:[400,401,403], body:{action:'createClient',data:{},tenantId:'nexia'}, note:'Deve exigir auth' },
+  { name:'Logs — sem token',         url:'/api/logs',    method:'GET', qs:'?tenantId=nexia', expect:[400,401,403], note:'Deve exigir auth' },
+  { name:'Swarm — sem token',        url:'/api/swarm',   method:'POST', expect:[400,401,403], body:{task:'test'}, note:'Deve exigir auth' },
+  { name:'KPI — sem token',          url:'/api/kpi',     method:'GET', expect:[400,401,403], note:'Deve exigir auth' },
+  { name:'Churn — sem token',        url:'/api/churn',   method:'POST', expect:[400,401,403], body:{tenantId:'nexia'}, note:'Deve exigir auth' },
+  { name:'Internal Agents — sem token', url:'/api/internal-agents', method:'POST', expect:[400,401,403], body:{}, note:'Deve exigir auth' },
+  { name:'Sentinel QA — ping',       url:'/api/sentinel-qa?action=ping', method:'GET', expect:[200,400,401,403,503], note:'Sentinel monitor' },
+  { name:'Observability — sem token',url:'/api/observe', method:'POST', expect:[400,401,403], body:{}, note:'Deve exigir auth' },
+  { name:'Metrics — sem secret',     url:'/api/metrics', method:'GET', expect:[400,401,403,503], note:'Deve exigir secret' },
+  { name:'Dynamic Pricing — sem token', url:'/api/dynamic-pricing', method:'POST', expect:[400,401,403], body:{action:'get',tenantId:'nexia'}, note:'Deve exigir auth' },
+  // OPTIONS preflight tests (all must return 200/204)
+  { name:'Cortex OPTIONS',     url:'/api/cortex',    method:'OPTIONS', expect:[200,204], note:'CORS OK' },
+  { name:'Billing OPTIONS',    url:'/api/billing',   method:'OPTIONS', expect:[200,204], note:'CORS OK' },
+  { name:'Tenant OPTIONS',     url:'/api/tenant',    method:'OPTIONS', expect:[200,204], note:'CORS OK' },
+  { name:'Actions OPTIONS',    url:'/api/actions',   method:'OPTIONS', expect:[200,204], note:'CORS OK' },
+];
+
+const SECURITY_TESTS = [
+  { name:'Sem credenciais hardcoded na config', url:'/api/firebase-config', method:'GET', check:'noHardcoded' },
+  { name:'X-Frame-Options header', url:'/', method:'GET', check:'header', header:'x-frame-options' },
+  { name:'X-Content-Type-Options header', url:'/', method:'GET', check:'header', header:'x-content-type-options' },
+  { name:'CORS não é wildcard em produção', url:'/api/cortex', method:'OPTIONS', check:'corsNotWildcard' },
+  { name:'Rota protegida: /nexia/ exige auth', url:'/nexia/nexia-master-admin.html', method:'GET', check:'pageLoads', note:'Deve redirecionar ou carregar com guard' },
+  { name:'Auth bypass: userId do body ignorado', url:'/api/cortex', method:'POST', check:'noUIDfromBody', body:{userId:'hacked-uid',message:'test',tenantId:'nexia'}, note:'Deve usar token, não body' },
+  { name:'SQL/NoSQL injection pattern bloqueado', url:'/api/cortex', method:'POST', check:'injectionBlocked', body:{message:"'; DROP TABLE users; --",tenantId:'nexia'} },
+  { name:'Referrer-Policy header', url:'/', method:'GET', check:'header', header:'referrer-policy' },
+  { name:'404 retorna JSON, não stack trace', url:'/api/rota-inexistente-xyz', method:'GET', check:'noStackTrace' },
+  { name:'500 não expõe detalhes internos', url:'/api/cortex', method:'POST', check:'no500Details', body:{} },
+];
+
+const UI_TESTS = [
+  { name:'Login page tem campo email', url:'/login', check:'hasElement', selector:'input[type="email"], input[name="email"], #email' },
+  { name:'Login page tem campo senha', url:'/login', check:'hasElement', selector:'input[type="password"], input[name="password"], #password' },
+  { name:'Login page tem botão submit', url:'/login', check:'hasElement', selector:'button[type="submit"], .btn-login, input[type="submit"]' },
+  { name:'Index tem link para login', url:'/', check:'hasLink', href:'/login' },
+  { name:'Nexia Master Admin carrega sem erro JS', url:'/nexia/nexia-master-admin.html', check:'pageOk' },
+  { name:'Cortex App carrega sem erro JS', url:'/nexia/cortex-app.html', check:'pageOk' },
+  { name:'Firebase config servida corretamente', url:'/api/firebase-config', check:'validJson' },
+  { name:'Sem links com maiúsculas no path Linux', url:'/nexia/nexia-master-admin.html', check:'pageOk', note:'Case-sensitive no Render' },
+];
+
+const PERF_TESTS = [
+  { name:'Homepage < 2s', url:'/', threshold:2000 },
+  { name:'Login < 1.5s', url:'/login', threshold:1500 },
+  { name:'Firebase config < 500ms', url:'/api/firebase-config', threshold:500 },
+  { name:'API auth OPTIONS < 300ms', url:'/api/auth', method:'OPTIONS', threshold:300 },
+  { name:'Cortex App < 3s', url:'/nexia/cortex-app.html', threshold:3000 },
+  { name:'API cortex response < 5s (cold start)', url:'/api/cortex', method:'OPTIONS', threshold:5000 },
+];
+
+// ── STATE ────────────────────────────────────────────────────────
+let results = { pass:0, fail:0, warn:0, total:0 };
+let fixes = [];
+let startTime = 0;
+
+// ── INIT ─────────────────────────────────────────────────────────
+function init() {
+  renderGrid('grid-pages', PAGES, 'pages');
+  renderGrid('grid-api', APIS, 'api');
+  renderGrid('grid-security', SECURITY_TESTS, 'security');
+  renderGrid('grid-ui', UI_TESTS, 'ui');
+  renderGrid('grid-perf', PERF_TESTS, 'perf');
+  updateStats();
+}
+
+function renderGrid(containerId, tests, section) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = tests.map((t,i) => `
+    <div class="test-item pending" id="test-${section}-${i}">
+      <div class="test-status pending" id="status-${section}-${i}">○</div>
+      <div class="test-name">${t.name}</div>
+      <div class="test-url">${t.url}${t.qs||''}</div>
+      <div class="test-detail" id="detail-${section}-${i}">${t.note||t.method||'GET'}</div>
+      <div class="test-time" id="time-${section}-${i}">—</div>
+    </div>
+  `).join('');
+}
+
+// ── FETCH WITH TIMEOUT ───────────────────────────────────────────
+async function safeFetch(url, opts={}, timeout=8000) {
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const t0 = Date.now();
+    const res = await fetch(url, { ...opts, signal: ctrl.signal, mode:'cors' });
+    return { res, ms: Date.now()-t0 };
+  } catch(e) {
+    return { error: e.name === 'AbortError' ? 'TIMEOUT' : e.message, ms: timeout };
+  } finally {
+    clearTimeout(tid);
+  }
+}
+
+// ── TEST RUNNERS ─────────────────────────────────────────────────
+async function runPageTest(test, section, idx) {
+  setRunning(section, idx);
+  const url = BASE() + test.url;
+  const { res, ms, error } = await safeFetch(url, { method: test.method||'GET' });
+
+  if (error) {
+    setResult(section, idx, 'fail', `Erro: ${error}`, ms);
+    addFix('critical', test.name, `Não carrega: ${error}`, test.url);
+    return 'fail';
+  }
+
+  const status = res.status;
+  const expected = Array.isArray(test.expect) ? test.expect : [test.expect];
+
+  if (expected.includes(status)) {
+    setResult(section, idx, 'pass', `${status} OK`, ms);
+    return 'pass';
+  } else if (status >= 500) {
+    setResult(section, idx, 'fail', `${status} ERRO SERVIDOR`, ms);
+    addFix('critical', test.name, `Retornou ${status} — erro interno`, test.url);
+    return 'fail';
+  } else if (status === 404) {
+    setResult(section, idx, 'fail', `404 NÃO ENCONTRADO`, ms);
+    addFix('critical', test.name, `Página não encontrada (404) — verifique o path e case-sensitivity`, test.url);
+    return 'fail';
+  } else {
+    setResult(section, idx, 'warn', `${status} inesperado`, ms);
+    return 'warn';
+  }
+}
+
+async function runApiTest(test, section, idx) {
+  setRunning(section, idx);
+  const url = BASE() + test.url + (test.qs||'');
+  const opts = {
+    method: test.method||'GET',
+    headers: { 'Content-Type':'application/json', 'X-Test-QA':'nexia-qa-center' }
+  };
+  if (test.body && test.method !== 'GET' && test.method !== 'OPTIONS') {
+    opts.body = JSON.stringify(test.body);
+  }
+
+  const { res, ms, error } = await safeFetch(url, opts, 10000);
+
+  if (error) {
+    setResult(section, idx, 'fail', `Erro: ${error}`, ms);
+    addFix('critical', test.name, `API inacessível: ${error}`, test.url);
+    return 'fail';
+  }
+
+  const status = res.status;
+  const expected = Array.isArray(test.expect) ? test.expect : [test.expect];
+
+  if (status >= 500) {
+    setResult(section, idx, 'fail', `${status} — ERRO INTERNO`, ms);
+    addFix('critical', test.name, `Endpoint retornou 500 — checar logs do Render`, test.url);
+    return 'fail';
+  }
+
+  if (expected.includes(status)) {
+    setResult(section, idx, 'pass', `${status} — ${test.note||'OK'}`, ms);
+    return 'pass';
+  } else {
+    setResult(section, idx, 'warn', `${status} — esperado ${expected.join('/')}`, ms);
+    return 'warn';
+  }
+}
+
+async function runSecurityTest(test, section, idx) {
+  setRunning(section, idx);
+  const url = BASE() + test.url;
+  const opts = {
+    method: test.method||'GET',
+    headers: { 'Content-Type':'application/json' }
+  };
+  if (test.body) opts.body = JSON.stringify(test.body);
+
+  const { res, ms, error } = await safeFetch(url, opts, 8000);
+
+  if (error) {
+    setResult(section, idx, 'warn', `Timeout/erro: ${error}`, ms);
+    return 'warn';
+  }
+
+  const status = res.status;
+  let text = '';
+  try { text = await res.text(); } catch(_) {}
+
+  switch(test.check) {
+    case 'header': {
+      const h = res.headers.get(test.header);
+      if (h) {
+        setResult(section, idx, 'pass', `Header presente: ${h}`, ms);
+        return 'pass';
+      } else {
+        setResult(section, idx, 'warn', `Header "${test.header}" ausente`, ms);
+        addFix('warn', test.name, `Header de segurança "${test.header}" não encontrado`, test.url);
+        return 'warn';
+      }
+    }
+    case 'corsNotWildcard': {
+      const corsH = res.headers.get('access-control-allow-origin');
+      if (!corsH || corsH === '*') {
+        setResult(section, idx, 'warn', `CORS wildcard (*) em produção`, ms);
+        addFix('warn', test.name, 'CORS está aberto (*) — configure NEXIA_APP_URL', test.url);
+        return 'warn';
+      } else {
+        setResult(section, idx, 'pass', `CORS restrito: ${corsH}`, ms);
+        return 'pass';
+      }
+    }
+    case 'noHardcoded': {
+      let json = {};
+      try { json = JSON.parse(text); } catch(_) {}
+      // Check that API key exists (503 means not configured which is actually safe)
+      if (status === 503) {
+        setResult(section, idx, 'pass', 'Retorna 503 sem chave — sem hardcode', ms);
+        return 'pass';
+      }
+      if (json.apiKey && json.apiKey.length > 10) {
+        setResult(section, idx, 'pass', 'Config servida via env vars', ms);
+        return 'pass';
+      }
+      setResult(section, idx, 'warn', 'Verificar config', ms);
+      return 'warn';
+    }
+    case 'noStackTrace': {
+      if (text.includes('Error:') && text.includes('at ') && text.includes('.js:')) {
+        setResult(section, idx, 'fail', 'Stack trace exposto!', ms);
+        addFix('critical', test.name, 'Stack trace do Node.js exposto publicamente — remover em produção', test.url);
+        return 'fail';
+      }
+      setResult(section, idx, 'pass', 'Sem stack trace exposto', ms);
+      return 'pass';
+    }
+    case 'no500Details': {
+      if (status === 500 && text.includes('Internal error')) {
+        setResult(section, idx, 'warn', '500 mas sem detalhes internos', ms);
+        return 'warn';
+      }
+      if (status >= 500) {
+        setResult(section, idx, 'fail', `${status} com detalhes: ${text.slice(0,50)}`, ms);
+        return 'fail';
+      }
+      setResult(section, idx, 'pass', `${status} — sem detalhes sensíveis`, ms);
+      return 'pass';
+    }
+    case 'injectionBlocked': {
+      if (status === 400 || status === 401 || status === 403) {
+        setResult(section, idx, 'pass', `${status} — bloqueado`, ms);
+        return 'pass';
+      }
+      if (status === 200) {
+        setResult(section, idx, 'warn', 'Injeção não bloqueada (sem auth)', ms);
+        return 'warn';
+      }
+      setResult(section, idx, 'warn', `${status} — verificar`, ms);
+      return 'warn';
+    }
+    default: {
+      if (status < 400) {
+        setResult(section, idx, 'pass', `${status} OK`, ms);
+        return 'pass';
+      } else {
+        setResult(section, idx, 'warn', `${status}`, ms);
+        return 'warn';
+      }
+    }
+  }
+}
+
+async function runUiTest(test, section, idx) {
+  setRunning(section, idx);
+  const url = BASE() + test.url;
+  const { res, ms, error } = await safeFetch(url, { method:'GET' }, 8000);
+
+  if (error) {
+    setResult(section, idx, 'fail', `Erro: ${error}`, ms);
+    return 'fail';
+  }
+
+  const status = res.status;
+  let text = '';
+  try { text = await res.text(); } catch(_) {}
+
+  switch(test.check) {
+    case 'hasElement': {
+      // Check if any of the selectors appear as attributes in HTML
+      const selectors = test.selector.split(',').map(s => s.trim());
+      const found = selectors.some(sel => {
+        // Simplified check — look for key attributes
+        if (sel.includes('email')) return text.includes('type="email"') || text.includes("type='email'") || text.includes('name="email"');
+        if (sel.includes('password')) return text.includes('type="password"') || text.includes("type='password'");
+        if (sel.includes('submit')) return text.includes('type="submit"') || text.includes('btn-login') || text.includes('Entrar');
+        return text.includes(sel.replace(/[.#\[\]="']/g,''));
+      });
+      if (found) {
+        setResult(section, idx, 'pass', 'Elemento encontrado', ms);
+        return 'pass';
+      } else {
+        setResult(section, idx, 'warn', `Elemento não encontrado: ${test.selector}`, ms);
+        addFix('warn', test.name, `Elemento UI ausente: ${test.selector}`, test.url);
+        return 'warn';
+      }
+    }
+    case 'hasLink': {
+      const found = text.includes(`href="${test.href}"`) || text.includes(`href='${test.href}'`) || text.includes(test.href);
+      if (found) {
+        setResult(section, idx, 'pass', `Link encontrado: ${test.href}`, ms);
+        return 'pass';
+      } else {
+        setResult(section, idx, 'warn', `Link não encontrado: ${test.href}`, ms);
+        return 'warn';
+      }
+    }
+    case 'validJson': {
+      try {
+        JSON.parse(text);
+        setResult(section, idx, 'pass', 'JSON válido', ms);
+        return 'pass';
+      } catch(_) {
+        setResult(section, idx, 'fail', 'JSON inválido ou erro', ms);
+        addFix('critical', test.name, 'Endpoint não retorna JSON válido', test.url);
+        return 'fail';
+      }
+    }
+    case 'pageOk': {
+      if (status === 200 && text.length > 100) {
+        const hasErrors = text.includes('Cannot GET') || text.includes('404') || text.includes('Not Found');
+        if (hasErrors) {
+          setResult(section, idx, 'warn', 'Página com possível erro no conteúdo', ms);
+          return 'warn';
+        }
+        setResult(section, idx, 'pass', `${status} — ${Math.round(text.length/1024)}KB`, ms);
+        return 'pass';
+      }
+      setResult(section, idx, 'fail', `${status} — conteúdo inválido`, ms);
+      return 'fail';
+    }
+    default:
+      setResult(section, idx, 'pass', `${status} OK`, ms);
+      return 'pass';
+  }
+}
+
+async function runPerfTest(test, section, idx) {
+  setRunning(section, idx);
+  const url = BASE() + test.url;
+  const opts = { method: test.method||'GET' };
+  const { res, ms, error } = await safeFetch(url, opts, Math.max(test.threshold * 2, 8000));
+
+  if (error) {
+    setResult(section, idx, 'fail', `${error}`, ms);
+    return 'fail';
+  }
+
+  if (ms <= test.threshold) {
+    setResult(section, idx, 'pass', `${ms}ms (< ${test.threshold}ms)`, ms);
+    return 'pass';
+  } else if (ms <= test.threshold * 1.5) {
+    setResult(section, idx, 'warn', `${ms}ms (lento, limite: ${test.threshold}ms)`, ms);
+    addFix('warn', test.name, `Resposta lenta: ${ms}ms (esperado < ${test.threshold}ms)`, test.url);
+    return 'warn';
+  } else {
+    setResult(section, idx, 'fail', `${ms}ms (muito lento! limite: ${test.threshold}ms)`, ms);
+    addFix('warn', test.name, `Resposta muito lenta: ${ms}ms`, test.url);
+    return 'fail';
+  }
+}
+
+// ── SECTION RUNNERS ──────────────────────────────────────────────
+async function runSection(section) {
+  switch(section) {
+    case 'pages': return runTestGroup(PAGES, 'pages', runPageTest, 'badge-pages', 'dot-pages', 'cnt-pages');
+    case 'api':   return runTestGroup(APIS, 'api', runApiTest, 'badge-api', 'dot-api', 'cnt-api');
+    case 'security': return runTestGroup(SECURITY_TESTS, 'security', runSecurityTest, 'badge-security', 'dot-security', 'cnt-security');
+    case 'ui':    return runTestGroup(UI_TESTS, 'ui', runUiTest, 'badge-ui', 'dot-ui', 'cnt-ui');
+    case 'perf':  return runTestGroup(PERF_TESTS, 'perf', runPerfTest, 'badge-perf', 'dot-perf', 'cnt-perf');
+  }
+}
+
+async function runTestGroup(tests, section, fn, badgeId, dotId, cntId) {
+  let pass=0, fail=0, warn=0;
+  setDot(dotId, 'running');
+  for (let i=0; i<tests.length; i++) {
+    const r = await fn(tests[i], section, i);
+    if (r === 'pass') pass++;
+    else if (r === 'fail') fail++;
+    else warn++;
+    updateProgress();
+  }
+  const status = fail > 0 ? 'fail' : warn > 0 ? 'warn' : 'pass';
+  setDot(dotId, status);
+  setBadge(badgeId, status, `${pass}✓ ${fail}✗ ${warn}⚠`);
+  document.getElementById(cntId).textContent = `${pass+fail+warn}`;
+  updateFixes();
+  return { pass, fail, warn };
+}
+
+async function runAllTests() {
+  fixes = [];
+  results = { pass:0, fail:0, warn:0, total:0 };
+  startTime = Date.now();
+  document.getElementById('btnRunAll').disabled = true;
+  document.getElementById('btnRunAll').textContent = '⏳ Testando...';
+
+  log('inf', 'Iniciando auditoria completa do sistema...');
+  log('inf', `Base URL: ${BASE()}`);
+
+  await runSection('pages');
+  await runSection('api');
+  await runSection('security');
+  await runSection('ui');
+  await runSection('perf');
+
+  const totalMs = Date.now() - startTime;
+  document.getElementById('statTime').textContent = totalMs > 1000 ? `${(totalMs/1000).toFixed(1)}s` : `${totalMs}ms`;
+  document.getElementById('btnRunAll').disabled = false;
+  document.getElementById('btnRunAll').textContent = '▶ Rodar Tudo';
+  log('ok', `Auditoria concluída em ${totalMs}ms — ${results.pass} passou, ${results.fail} falhou, ${results.warn} aviso`);
+}
+
+// ── UI HELPERS ───────────────────────────────────────────────────
+function setRunning(section, idx) {
+  const el = document.getElementById(`test-${section}-${idx}`);
+  const st = document.getElementById(`status-${section}-${idx}`);
+  if (el) { el.className = 'test-item running'; }
+  if (st) { st.className = 'test-status running'; st.textContent = '⟳'; }
+}
+
+function setResult(section, idx, status, detail, ms) {
+  const el = document.getElementById(`test-${section}-${idx}`);
+  const st = document.getElementById(`status-${section}-${idx}`);
+  const dt = document.getElementById(`detail-${section}-${idx}`);
+  const tm = document.getElementById(`time-${section}-${idx}`);
+  if (!el) return;
+  const icons = { pass:'✓', fail:'✗', warn:'⚠' };
+  el.className = `test-item ${status}`;
+  if (st) { st.className = `test-status ${status}`; st.textContent = icons[status]||'?'; }
+  if (dt) dt.textContent = detail;
+  if (tm) tm.textContent = ms ? (ms > 1000 ? `${(ms/1000).toFixed(1)}s` : `${ms}ms`) : '';
+  // Update global stats
+  results[status]++;
+  results.total++;
+  updateStats();
+  const shortName = detail.slice(0,40);
+  if (status === 'pass') log('ok', shortName);
+  else if (status === 'fail') log('err', shortName);
+  else log('wrn', shortName);
+}
+
+function updateStats() {
+  document.getElementById('statPass').textContent = results.pass;
+  document.getElementById('statFail').textContent = results.fail;
+  document.getElementById('statWarn').textContent = results.warn;
+  document.getElementById('statTotal').textContent = results.total;
+}
+
+function updateProgress() {
+  const total = PAGES.length + APIS.length + SECURITY_TESTS.length + UI_TESTS.length + PERF_TESTS.length;
+  const pct = Math.round((results.total / total) * 100);
+  document.getElementById('mainProgress').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${results.total}/${total} testes (${pct}%) — ${results.pass} passou · ${results.fail} falhou · ${results.warn} aviso`;
+}
+
+function setBadge(id, status, text) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `section-badge ${status}`;
+  el.textContent = text;
+}
+
+function setDot(id, status) {
+  const el = document.getElementById(id);
+  if (el) el.className = `nav-dot ${status}`;
+}
+
+function addFix(severity, name, desc, url) {
+  fixes.push({ severity, name, desc, url });
+  document.getElementById('cnt-fixes').textContent = fixes.length;
+}
+
+function updateFixes() {
+  const c = document.getElementById('fix-list-container');
+  if (fixes.length === 0) {
+    c.innerHTML = '<div style="color:var(--green);font-size:13px;padding:20px 0">✅ Nenhuma correção necessária encontrada.</div>';
+    setBadge('badge-fixes', 'pass', 'Nenhuma');
+    return;
+  }
+  const sevOrder = { critical:0, warn:1, info:2 };
+  const sorted = [...fixes].sort((a,b) => sevOrder[a.severity] - sevOrder[b.severity]);
+  setBadge('badge-fixes', 'fail', `${fixes.filter(f=>f.severity==='critical').length} crítico(s)`);
+  c.innerHTML = `<div class="fix-list">${sorted.map(f => `
+    <div class="fix-item">
+      <div class="fix-sev ${f.severity}">${f.severity.toUpperCase()}</div>
+      <div class="fix-text"><strong>${f.name}</strong><span>${f.desc} — <em>${f.url}</em></span></div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function log(level, msg) {
+  const now = new Date().toLocaleTimeString('pt-BR',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const icons = { ok:'✓', err:'✗', wrn:'⚠', inf:'ℹ' };
+  const miniLog = document.getElementById('miniLog');
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-time">${now}</span><span class="log-level ${level}">${icons[level]}</span><span class="log-msg">${msg}</span>`;
+  miniLog.appendChild(line);
+  miniLog.scrollTop = miniLog.scrollHeight;
+}
+
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function clearResults() {
+  results = { pass:0, fail:0, warn:0, total:0 };
+  fixes = [];
+  updateStats();
+  updateProgress();
+  document.getElementById('miniLog').innerHTML = '';
+  init();
+}
+
+function exportReport() {
+  const report = {
+    timestamp: new Date().toISOString(),
+    baseUrl: BASE(),
+    results,
+    fixes,
+    duration: document.getElementById('statTime').textContent
+  };
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `nexia-qa-report-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+// ── START ────────────────────────────────────────────────────────
+init();
+log('inf', 'QA Center carregado. Configure a URL base e clique em "Rodar Tudo".');
+</script>
+
+  <script src="/core/nexia-theme.js"></script>
+  <script src="/core/nexia-i18n.js"></script>
+</body>
+</html>

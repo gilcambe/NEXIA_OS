@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#04060C;--c1:#00F0FF;--c2:#7C3AED;--text:#E8ECF4;--text2:rgba(232,236,244,.6);--brd:rgba(255,255,255,.08);}
+body{background:var(--ink);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.7;min-height:100vh;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--brd);position:sticky;top:0;background:rgba(4,6,12,.9);backdrop-filter:blur(12px);z-index:100;}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-orb{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--c1),var(--c2));display:flex;align-items:center;justify-content:center;font-size:16px;}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--text);}
+.nav-logo span{color:var(--c1);}
+.nav-back{color:var(--text2);text-decoration:none;font-size:14px;display:flex;align-items:center;gap:6px;transition:color .2s;}
+.nav-back:hover{color:var(--c1);}
+main{max-width:800px;margin:0 auto;padding:60px 40px 100px;}
+h1{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:800;margin-bottom:12px;background:linear-gradient(135deg,var(--text),var(--c1));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.subtitle{color:var(--text2);margin-bottom:48px;font-size:15px;}
+h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--c1);margin:40px 0 12px;}
+p{color:var(--text2);margin-bottom:16px;font-size:15px;}
+ul{color:var(--text2);margin:0 0 16px 24px;font-size:15px;}
+ul li{margin-bottom:6px;}
+.card{background:rgba(255,255,255,.03);border:1px solid var(--brd);border-radius:16px;padding:28px;margin-bottom:20px;}
+.card p:last-child{margin-bottom:0;}
+footer{border-top:1px solid var(--brd);padding:30px 40px;text-align:center;color:var(--text2);font-size:13px;}
+footer a{color:var(--text2);text-decoration:none;margin:0 12px;}
+footer a:hover{color:var(--c1);}
+@media(max-width:600px){nav{padding:16px 20px;}main{padding:40px 20px 80px;}footer{padding:20px;}}
+</style>
+<title>NEXIA OS — Termos de Uso</title>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-orb"><i class="ri-brain-fill"></i></div>
+    <span class="nav-logo">NEXIA<span>OS</span></span>
+  </a>
+  <a href="/" class="nav-back"><i class="ri-arrow-left-line"></i> Voltar</a>
+</nav>
+<main>
+<h1>Termos de Uso</h1>
+<p class="subtitle">Última atualização: 30 de abril de 2026 — Leia com atenção antes de utilizar a plataforma.</p>
+
+<div class="card">
+<h2>1. Aceitação dos Termos</h2>
+<p>Ao acessar ou utilizar a plataforma NEXIA OS, você concorda com estes Termos de Uso. Caso não concorde com alguma disposição, não utilize a plataforma.</p>
+</div>
+<div class="card">
+<h2>2. Descrição do Serviço</h2>
+<p>A NEXIA OS é um sistema operacional de inteligência artificial que permite orquestrar múltiplos modelos de IA, criar agentes autônomos, automatizar fluxos de trabalho e gerenciar operações empresariais por meio de inteligência artificial.</p>
+</div>
+<div class="card">
+<h2>3. Uso Permitido e Proibido</h2>
+<p><strong>Permitido:</strong> utilizar agentes de IA para fins legítimos de negócio, integrar APIs externas conforme documentação, criar e gerenciar fluxos automatizados.</p>
+<p><strong>Proibido:</strong> atividades ilegais ou fraudulentas, acesso não autorizado a contas de terceiros, engenharia reversa do software, geração de conteúdo prejudicial ou enganoso.</p>
+</div>
+<div class="card">
+<h2>4. Planos e Pagamentos</h2>
+<p>Os planos estão descritos em <a href="/nexia/plans" style="color:var(--c1);">/nexia/plans</a>. Cobranças são processadas mensalmente ou anualmente conforme o plano contratado. Cancelamentos não geram reembolso do período em curso.</p>
+</div>
+<div class="card">
+<h2>5. Limitação de Responsabilidade</h2>
+<p>A NEXIA OS não se responsabiliza por decisões tomadas com base nas respostas dos agentes de IA. Os modelos de linguagem podem cometer erros. É responsabilidade do usuário validar as saídas geradas antes de aplicá-las em contextos críticos.</p>
+</div>
+<div class="card">
+<h2>6. Lei Aplicável</h2>
+<p>Estes termos são regidos pelas leis brasileiras. Fica eleito o foro da Comarca de São Paulo/SP para dirimir quaisquer controvérsias.</p>
+</div>
+</main>
+<footer>
+  <a href="/privacidade">Privacidade</a>
+  <a href="/termos">Termos de Uso</a>
+  <a href="/cookies">Cookies</a>
+  <a href="/lgpd">LGPD</a>
+  <span style="margin-left:16px">© 2025 NEXIA OS. Todos os direitos reservados.</span>
+</footer>
+</body>
+</html>
