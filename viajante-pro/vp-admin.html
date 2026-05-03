@@ -780,7 +780,7 @@ const COL=c=>db.collection('data').doc(T).collection(c);
       document.body.style.visibility='visible';
     }
   }, 7000);
-  firebase.auth().onAuthStateChanged(async function(user){
+  NEXIA.auth.onAuthStateChanged(async function(user){
     if(!user){
       window.location.href='../login.html?next='+encodeURIComponent(window.location.pathname);
       return;
@@ -1474,7 +1474,7 @@ if (!window.nexiaConfirm) {
 <script>
 /* ═══ authFetch — envia token Firebase em TODOS os requests /api ═══ */
 async function authFetch(url, options = {}) {
-  const user = firebase.auth().currentUser;
+  const user = (NEXIA.auth ? NEXIA.auth.currentUser : null);
   if (!user) {
     window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
     return null;

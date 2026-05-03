@@ -167,7 +167,7 @@ const STATIC_AGENTS = {
 // ═══ STREAMING ════════════════════════════════════════════════════════
 async function* streamAnthropic(system, messages, modelId, maxTok) {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) { yield '⚠️ **ANTHROPIC_API_KEY não configurada.** Adicione no Netlify → Environment Variables.'; return; }
+  if (!key) { yield '⚠️ **ANTHROPIC_API_KEY não configurada.** Configure no Render Dashboard → Environment.'; return; }
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -191,7 +191,7 @@ async function* streamAnthropic(system, messages, modelId, maxTok) {
 
 async function* streamOpenAI(system, messages, modelId, maxTok) {
   const key = process.env.OPENAI_API_KEY;
-  if (!key) { yield '⚠️ **OPENAI_API_KEY não configurada.** Adicione no Netlify → Environment Variables.'; return; }
+  if (!key) { yield '⚠️ **OPENAI_API_KEY não configurada.** Configure no Render Dashboard → Environment.'; return; }
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -215,7 +215,7 @@ async function* streamOpenAI(system, messages, modelId, maxTok) {
 
 async function* streamGroq(system, messages, modelId, maxTok) {
   const key = process.env.GROQ_API_KEY;
-  if (!key) { yield '⚠️ **GROQ_API_KEY não configurada.**\n\nCadastre GRÁTIS em: https://console.groq.com\nAdicione no Netlify → Environment Variables.'; return; }
+  if (!key) { yield '⚠️ **GROQ_API_KEY não configurada.**\n\nCadastre GRÁTIS em: https://console.groq.com\nConfigure no Render Dashboard → Environment.'; return; }
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -239,7 +239,7 @@ async function* streamGroq(system, messages, modelId, maxTok) {
 
 async function* streamGemini(system, messages, modelId, maxTok) {
   const key = process.env.GEMINI_API_KEY;
-  if (!key) { yield '⚠️ **GEMINI_API_KEY não configurada.**\n\nCadastre GRÁTIS em: https://aistudio.google.com\nAdicione no Netlify → Environment Variables.'; return; }
+  if (!key) { yield '⚠️ **GEMINI_API_KEY não configurada.**\n\nCadastre GRÁTIS em: https://aistudio.google.com\nConfigure no Render Dashboard → Environment.'; return; }
   try {
     const gemMessages = messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(m.content) }] }));
     const res = await _fetchTimeout(`https://generativelanguage.googleapis.com/v1beta/models/${modelId || 'gemini-2.0-flash'}:streamGenerateContent?key=${key}&alt=sse`, {}, 60000, {
@@ -431,7 +431,7 @@ async function callSync(system, messages, modelKey, maxTok) {
   ]) {
     if (process.env[k]) return callSync(system, messages, mk, Math.min(tok, 32768));
   }
-  throw new Error('Nenhuma API key configurada. Adicione GROQ_API_KEY ou GEMINI_API_KEY no Netlify.');
+  throw new Error('Nenhuma API key configurada. Adicione GROQ_API_KEY ou GEMINI_API_KEY no Render Dashboard → Environment.');
 }
 
 // ═══ IMAGEM ═══════════════════════════════════════════════════════════
@@ -703,7 +703,7 @@ exports.handler = async (event) => {
               try { finalResponse = await callSync(systemPrompt, fullCtx.slice(-15), fm, 4096); modelUsed = `sync-fallback:${fm}`; break; } catch { }
             }
           } catch { }
-          if (!finalResponse) finalResponse = '❌ Todas as IAs estão indisponíveis. Verifique as API keys no Netlify.';
+          if (!finalResponse) finalResponse = '❌ Todas as IAs estão indisponíveis. Verifique as API keys no Render Dashboard → Environment.';
           return { statusCode: 200, headers: SSE_HEADERS, body: `data: ${JSON.stringify({ token: finalResponse, done: false })}\n\ndata: ${JSON.stringify({ done: true, model: 'fallback' })}\n\ndata: [DONE]\n\n` };
         }
         // código legado abaixo — provider sem streaming nativo

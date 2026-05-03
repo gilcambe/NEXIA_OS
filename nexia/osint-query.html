@@ -787,13 +787,6 @@ body::after {
 }
 
 </style>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="/core/nexia-boot.js"></script>
-<script src="/core/auth.js"></script>
-<script src="/core/nav-guard.js"></script>
 <script src="/core/governance.js"></script>
 <script src="/core/bridge.js"></script>
   <link rel="stylesheet" href="/core/nexia-theme.css">
@@ -869,7 +862,7 @@ input::placeholder,textarea::placeholder { color: var(--text3) !important; }
         if (!u) { window.location.href = '/login'; }
       });
     } else if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-      firebase.auth().onAuthStateChanged(u => {
+      NEXIA.auth.onAuthStateChanged(u => {
         if (!u) { window.location.href = '/login'; }
       });
     } else if (++_attempts < 100) {
@@ -882,6 +875,12 @@ input::placeholder,textarea::placeholder { color: var(--text3) !important; }
 })();
 </script>
 
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="/core/nexia-boot.js"></script>
+  <script src="/core/auth.js"></script>
+  <script src="/core/nav-guard.js"></script>
 </head>
 <body>
 
@@ -1397,7 +1396,7 @@ async function runRealQuery() {
     // Obtém token Firebase para auth bearer
     let token = '';
     try {
-      const u = firebase.auth().currentUser;
+      const u = (NEXIA.auth ? NEXIA.auth.currentUser : null);
       if (u) token = await u.getIdToken();
     } catch(e) {}
 
@@ -1472,7 +1471,7 @@ async function runRealQuery() {
   <script>
 /* ═══ authFetch — envia token Firebase em TODOS os requests /api ═══ */
 async function authFetch(url, options = {}) {
-  const user = firebase.auth().currentUser;
+  const user = (NEXIA.auth ? NEXIA.auth.currentUser : null);
   if (!user) {
     window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
     return null;

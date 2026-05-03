@@ -329,7 +329,6 @@ select.inp option{background:var(--bg2)}
 .qa-fab{position:fixed;bottom:24px;left:24px;z-index:9999;background:linear-gradient(135deg,#00d68f,#00e5ff);color:#000;border:0;border-radius:50px;padding:12px 20px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,214,143,.4);transition:all .2s}
 .qa-fab:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,214,143,.5)}
 </style>
-  <script src="/core/nav-guard.js"></script>
   <link rel="stylesheet" href="/core/nexia-theme.css">
 <style>
 /* NEXIA Theme Bridge — mapeia vars antigas para o Design System v2 */
@@ -399,6 +398,12 @@ input::placeholder,textarea::placeholder { color: var(--text3) !important; }
 
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="/core/nexia-boot.js"></script>
+  <script src="/core/auth.js"></script>
+  <script src="/core/nav-guard.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -999,11 +1004,6 @@ input::placeholder,textarea::placeholder { color: var(--text3) !important; }
 <div id="toast"></div>
 
 <!-- Firebase SDK (Compat) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="/core/nexia-boot.js"></script>
-<script src="/core/auth.js"></script>
 
 <script>
 // ═══ SECURITY HELPERS ═══
@@ -1432,7 +1432,7 @@ function impersonateTenant(slug) {
 async function globalKill() {
   const v = document.getElementById('kill-confirm').value;
   // Validação via Firebase Auth - apenas master autenticado pode usar Kill Switch
-  const currentUser = firebase.auth().currentUser;
+  const currentUser = (NEXIA.auth ? NEXIA.auth.currentUser : null);
   if (!currentUser) { toast('❌ Você precisa estar autenticado'); return; }
   // Reautentica para confirmar identidade antes de ação crítica
   const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, v);
@@ -1735,7 +1735,7 @@ async function salvarAgente() {
     await _db.collection('agents').add({
       name: nome, type: tipo, prompt, tenantId: 'nexia',
       status: 'published', createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy: firebase.auth().currentUser?.uid || 'master'
+      createdBy: (NEXIA.auth ? NEXIA.auth.currentUser : null)?.uid || 'master'
     });
     addLog('OK', 'Agente publicado: ' + nome, 'nexia');
     toast('✅ Agente criado e publicado!');
@@ -1752,7 +1752,7 @@ async function publicarModulo() {
     await _db.collection('nexia_store').add({
       name: nome, price: preco, description: desc,
       status: 'published', createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy: firebase.auth().currentUser?.uid || 'master'
+      createdBy: (NEXIA.auth ? NEXIA.auth.currentUser : null)?.uid || 'master'
     });
     addLog('OK', 'Módulo publicado na Store: ' + nome, 'nexia');
     toast('✅ Módulo publicado na Store!');
@@ -1796,7 +1796,7 @@ async function aprovarPagamento(btn, tenantId, plano) {
     await _db.collection('tenants').doc(tenantId).update({
       'subscription.status': 'active', 'subscription.plan': plano,
       'subscription.approvedAt': firebase.firestore.FieldValue.serverTimestamp(),
-      'subscription.approvedBy': firebase.auth().currentUser?.uid || 'master'
+      'subscription.approvedBy': (NEXIA.auth ? NEXIA.auth.currentUser : null)?.uid || 'master'
     });
     await _db.collection('billing_engine').add({
       tenantId, plan: plano, action: 'manual_approval',
@@ -1956,7 +1956,7 @@ document.addEventListener('DOMContentLoaded', () => { setLang(_lang); });
   <script>
 /* ═══ authFetch — envia token Firebase em TODOS os requests /api ═══ */
 async function authFetch(url, options = {}) {
-  const user = firebase.auth().currentUser;
+  const user = (NEXIA.auth ? NEXIA.auth.currentUser : null);
   if (!user) {
     window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
     return null;

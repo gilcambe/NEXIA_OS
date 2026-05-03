@@ -20,19 +20,20 @@ const NexiaAuth = (() => {
               _userProfile = snap.data();
               const slug = _userProfile.tenantSlug || _userProfile.tenant;
               if (slug) NEXIA.setTenant(slug);
-              // FIX v54: redirect para /onboarding no primeiro login
-              // onboardingDone ausente ou false → usuário nunca completou o setup
-              if (!_userProfile.onboardingDone) {
+              // FIX v57: master e admin nunca vão para onboarding
+              // onboardingDone ausente ou false → redireciona apenas usuários comuns
+              const isMasterOrAdmin = ['master','admin'].includes(_userProfile.role);
+              if (!_userProfile.onboardingDone && !isMasterOrAdmin) {
                 const isOnPage = p => window.location.pathname.startsWith(p);
                 const alreadyOnboarding = isOnPage('/onboarding') || isOnPage('/login');
                 if (!alreadyOnboarding) window.location.href = '/onboarding';
               }
             } else {
-              _userProfile = { uid: user.uid, email: user.email, displayName: user.displayName || user.email, tenantSlug: 'guest', role: 'user', onboardingDone: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+              _userProfile = { uid: user.uid, email: user.email, displayName: user.displayName || user.email, tenantSlug: 'nexia', role: 'user', onboardingDone: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
               await NEXIA.db.collection('users').doc(user.uid).set(_userProfile);
-              // Novo usuário — sempre manda para onboarding
-              const isOnPage = p => window.location.pathname.startsWith(p);
-              if (!isOnPage('/onboarding') && !isOnPage('/login')) {
+              // Novo usuário comum — manda para onboarding
+              const isOnPage2 = p => window.location.pathname.startsWith(p);
+              if (!isOnPage2('/onboarding') && !isOnPage2('/login')) {
                 window.location.href = '/onboarding';
               }
             }

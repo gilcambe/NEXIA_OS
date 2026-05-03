@@ -44,3 +44,5 @@ services:
         sync: false
       - key: GITHUB_REPO
         sync: false
+      - key: MASTER_EMAIL
+        value: admin@nexia.com

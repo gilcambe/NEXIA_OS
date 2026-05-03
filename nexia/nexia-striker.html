@@ -273,7 +273,7 @@ async function addProspect() {
   // Salvar no Firestore
   if (typeof firebase !== 'undefined') {
     try {
-      await firebase.firestore().collection(`tenants/${tenantId}/striker_prospects`).doc(prospect.id).set(prospect);
+      await NEXIA.db ?NEXIA.db.collection(`tenants/${tenantId}/striker_prospects`).doc(prospect.id).set(prospect);
     } catch(e) {}
   }
 
@@ -294,7 +294,7 @@ function advanceStatus(id) {
     p.proximaAcao = acoes[p.status] || '—';
     renderProspects();
     if (typeof firebase !== 'undefined') {
-      firebase.firestore().collection(`tenants/${tenantId}/striker_prospects`).doc(id).update({ status: p.status, proximaAcao: p.proximaAcao }).catch(() => {});
+      NEXIA.db ?NEXIA.db.collection(`tenants/${tenantId}/striker_prospects`).doc(id).update({ status: p.status, proximaAcao: p.proximaAcao }).catch(() => {});
     }
   }
 }
@@ -402,10 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // FIX: aguarda Firebase inicializar antes de executar (evita "No Firebase App")
   const _boot = () => {
   if (typeof firebase !== 'undefined') {
-    firebase.auth().onAuthStateChanged(user => {
+    NEXIA.auth.onAuthStateChanged(user => {
       if (!user) { window.location.href = '/login.html'; return; }
       try {
-        firebase.firestore().collection(`tenants/${tenantId}/striker_prospects`)
+        NEXIA.db ?NEXIA.db.collection(`tenants/${tenantId}/striker_prospects`)
           .orderBy('criadoEm','desc').limit(50).onSnapshot(snap => {
             prospects = snap.docs.map(d => ({id:d.id,...d.data()}));
             renderProspects();
@@ -424,7 +424,7 @@ async function authFetch(url, options = {}) {
   try {
     user = (typeof NEXIA !== 'undefined' && NEXIA.auth)
       ? NEXIA.auth.currentUser
-      : firebase.auth().currentUser;
+      : (NEXIA.auth ? NEXIA.auth.currentUser : null);
   } catch(e) { user = null; }
   if (!user) {
     window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);

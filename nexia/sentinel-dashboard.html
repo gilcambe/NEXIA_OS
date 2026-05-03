@@ -488,7 +488,7 @@ function initRealtimeListeners() {
 
   // Aguarda auth antes de abrir listeners Firestore
   if (typeof firebase !== 'undefined' && firebase.auth) {
-    firebase.auth().onAuthStateChanged(user => {
+    NEXIA.auth.onAuthStateChanged(user => {
       if (user) {
         log('ok', `[Auth] Autenticado: ${user.email}`);
         startListeners();
@@ -984,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initRealtimeListeners();
     // FIX v49: aguarda onAuthStateChanged para garantir token disponível antes de loadLastReport
     if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) {
-      firebase.auth().onAuthStateChanged(user => {
+      NEXIA.auth.onAuthStateChanged(user => {
         if (user) loadLastReport();
       });
     }
@@ -997,7 +997,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <script>
 /* ═══ authFetch — envia token Firebase em TODOS os requests /api ═══ */
 async function authFetch(url, options = {}) {
-  const user = firebase.auth().currentUser;
+  const user = (NEXIA.auth ? NEXIA.auth.currentUser : null);
   if (!user) {
     window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
     return null;

@@ -340,7 +340,7 @@ function getProfile() {
 
 async function tryResolveProfile(u) {
   try {
-    const snap = await firebase.firestore().collection('users').doc(u.uid).get();
+    const snap = await NEXIA.db ?NEXIA.db.collection('users').doc(u.uid).get();
     if (snap.exists) applyProfile({ ...snap.data(), uid: u.uid });
     else applyProfile({ displayName: u.email, plan: 'free' });
   } catch {
@@ -377,7 +377,7 @@ function applyProfile(p) {
 
 // ── AUTH FETCH ─────────────────────────────────────────────────────────
 async function authFetch(url, opts = {}) {
-  const token = await (firebase.auth().currentUser?.getIdToken().catch(() => '')) || '';
+  const token = await ((NEXIA.auth ? NEXIA.auth.currentUser : null)?.getIdToken().catch(() => '')) || '';
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const ctrl = new AbortController();

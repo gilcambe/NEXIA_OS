@@ -435,7 +435,7 @@ function toggleFaq(btn) {
 
 // ── Auth ──────────────────────────────────────────────────────
 async function authFetch(url, options = {}) {
-  const token = await firebase.auth().currentUser?.getIdToken();
+  const token = await (NEXIA.auth ? NEXIA.auth.currentUser : null)?.getIdToken();
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return fetch(url, { ...options, headers });
@@ -506,7 +506,7 @@ function markCurrentPlan(plan) {
 }
 
 // ── Init ─────────────────────────────────────────────────────
-firebase.auth().onAuthStateChanged(async (user) => {
+NEXIA.auth.onAuthStateChanged(async (user) => {
   const loading = document.getElementById('plansLoading');
   const grid    = document.getElementById('plansGrid');
 

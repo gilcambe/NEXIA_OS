@@ -36,7 +36,7 @@ exports.handler = async (event) => {
   const authErr = await guard(event, 'autocommit', { requiredRole: 'master' });
   if (authErr) return authErr;
 
-  if (!GITHUB_TOKEN) return { statusCode: 400, headers, body: JSON.stringify({ error: 'GITHUB_TOKEN não configurado. Adicione no Netlify → Environment Variables.' }) };
+  if (!GITHUB_TOKEN) return { statusCode: 400, headers, body: JSON.stringify({ error: 'GITHUB_TOKEN não configurado. Adicione no Render Dashboard → Environment.' }) };
 
   let body = {};
   try { body = JSON.parse(event.body || '{}'); } catch { return { statusCode: 400, headers, body: JSON.stringify({ error: 'JSON inválido' }) }; }

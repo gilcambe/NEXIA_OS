@@ -45,7 +45,7 @@ async function generateAdCreative(produto, publico, objetivo, tom) {
 async function createMetaCampaign(config) {
   const token = process.env.META_ADS_TOKEN;
   const adAccountId = process.env.META_AD_ACCOUNT_ID;
-  if (!token || !adAccountId) throw new Error('META_ADS_TOKEN e META_AD_ACCOUNT_ID não configurados no Netlify');
+  if (!token || !adAccountId) throw new Error('META_ADS_TOKEN e META_AD_ACCOUNT_ID não configurados no Render');
   const campRes = await fetch('https://graph.facebook.com/v18.0/'+adAccountId+'/campaigns', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({name:config.nome,objective:config.objetivo||'OUTCOME_LEADS',status:'PAUSED',special_ad_categories:[],access_token:token})

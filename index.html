@@ -14,14 +14,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
 <!-- BUG-001 FIX: Firebase SDK + NEXIA config/auth carregados antes de qualquer script inline -->
-<script src="/core/nexia-boot.js"></script>
 <script src="/core/nexia-theme.js"></script>
 <script src="/core/nexia-i18n.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="/core/bridge.js"></script>
-<script src="/core/auth.js"></script>
 <script src="/core/nexia-engine.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -288,7 +283,6 @@ footer{padding:60px 40px 40px;border-top:1px solid var(--brd)}
 }
 
 </style>
-  <script src="/core/nav-guard.js"></script>
 
 <script>
 /* === NEXIA Firebase Resilience v12 === */
@@ -317,6 +311,12 @@ footer{padding:60px 40px 40px;border-top:1px solid var(--brd)}
   };
 })();
 </script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="/core/nexia-boot.js"></script>
+  <script src="/core/auth.js"></script>
+  <script src="/core/nav-guard.js"></script>
 </head>
 <body>
 

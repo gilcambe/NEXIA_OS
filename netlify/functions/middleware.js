@@ -146,8 +146,9 @@ async function validateTenant(userId, tenantId) {
     const profile = userDoc.data();
     const userTenant = profile.tenantSlug || profile.tenant;
     const userRole = profile.role || 'user';
-    // Master ou pertence ao tenant nexia → acesso total
-    if (userTenant === 'nexia' || userRole === 'master') return { ok: true, role: 'master' };
+    // FIX v57: MASTER_EMAIL auto-eleva independente do Firestore
+    const masterEmail = process.env.MASTER_EMAIL || 'admin@nexia.com';
+    if (profile.email === masterEmail || userTenant === 'nexia' || userRole === 'master') return { ok: true, role: 'master' };
     // FIX v50: usuário 'guest' tentando acessar tenant 'nexia' → auto-repara se
     // foi registrado antes do set-master-role ser executado. Verifica se é o
     // único tenant existente (setup inicial) e eleva para member do nexia.
@@ -291,12 +292,12 @@ async function verifyBearerToken(event) {
         if (userDoc.exists) role = userDoc.data().role || 'user';
       } catch(e) { /* log only */ }
     }
-    // FIX v49: Custom Claims do Firebase Auth têm prioridade sobre Firestore
-    // set-master-role.js define claims {role:'master', tenantSlug:'nexia'}
+    // FIX v57: Custom Claims do Firebase Auth têm prioridade sobre Firestore
     if (decoded.role) role = decoded.role;
-    // Usuário do tenant nexia sem doc no Firestore → promove a master
-    if (!decoded.role && !db && decoded.email) role = 'user';
-    return { ok: true, uid: decoded.uid, email: decoded.email, role, tenantSlug: decoded.tenantSlug };
+    // FIX v57: MASTER_EMAIL no env → eleva automaticamente sem precisar rodar set-master-role.js
+    const masterEmail = process.env.MASTER_EMAIL || 'admin@nexia.com';
+    if (decoded.email && decoded.email === masterEmail) role = 'master';
+    return { ok: true, uid: decoded.uid, email: decoded.email, role, tenantSlug: decoded.tenantSlug || 'nexia' };
   } catch (e) {
     return { ok: false, reason: `Token inválido: ${'Internal error'}` };
   }

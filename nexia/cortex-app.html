@@ -569,7 +569,7 @@ async function runAutoDevGenerate() {
 
   try {
     let _autodevHeaders = { 'Content-Type': 'application/json' };
-    try { const _u = firebase.auth().currentUser; if (_u) { const _t = await _u.getIdToken(); _autodevHeaders['Authorization'] = 'Bearer ' + _t; } } catch(_) {}
+    try { const _u = NEXIA.auth ? NEXIA.auth.currentUser : null; if (_u) { const _t = await _u.getIdToken(); _autodevHeaders['Authorization'] = 'Bearer ' + _t; } } catch(_) {}
     const res = await fetch(`${API_BASE}/autodev`, {
       method: 'POST',
       headers: _autodevHeaders,
@@ -719,7 +719,7 @@ let conversations = {};
         init();
       });
     } else if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-      firebase.auth().onAuthStateChanged(u => {
+      NEXIA.auth.onAuthStateChanged(u => {
         if (!u) { window.location.href = '/login'; return; }
         userId = u.uid;
         init();
@@ -782,7 +782,7 @@ const LS_KEY = () => `cortex_convs_${tenantId}_${userId}`;
 const FS_DOC = () => {
   try {
     const db = typeof NEXIA !== 'undefined' && NEXIA.db ? NEXIA.db
-              : (typeof firebase !== 'undefined' ? firebase.firestore() : null);
+              : (typeof firebase !== 'undefined' ? NEXIA.db || firebase.firestore() : null);
     if (!db || !userId) return null;
     return db.collection('users').doc(userId).collection('cortex_history').doc(tenantId || 'nexia');
   } catch { return null; }
@@ -921,7 +921,7 @@ async function loadUsage() {
     try {
       const fbUser = (typeof NEXIA !== 'undefined' && NEXIA.auth)
         ? await new Promise(r => { const u = NEXIA.auth.currentUser; u ? u.getIdToken().then(r).catch(() => r('')) : r(''); })
-        : await new Promise(r => { const u = firebase.auth().currentUser; u ? u.getIdToken().then(r).catch(() => r('')) : r(''); });
+        : await new Promise(r => { const u = NEXIA.auth ? NEXIA.auth.currentUser : null; u ? u.getIdToken().then(r).catch(() => r('')) : r(''); });
       token = fbUser || '';
     } catch {}
     const controller = new AbortController();
@@ -1004,7 +1004,7 @@ async function sendMsg() {
     // NEXIA FIX: envia ID Token do Firebase para autenticação nas functions
     let _authHeaders = { 'Content-Type': 'application/json' };
     try {
-      const _fbUser = firebase.auth().currentUser;
+      const _fbUser = NEXIA.auth ? NEXIA.auth.currentUser : null;
       if (_fbUser) {
         const _idToken = await _fbUser.getIdToken();
         _authHeaders['Authorization'] = 'Bearer ' + _idToken;

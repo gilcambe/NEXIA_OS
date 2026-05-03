@@ -477,7 +477,7 @@ async function processPayment() {
     const tx = { id: `tx_${Date.now()}`, nome, email, desc, valor, method: selectedPayMethod, status: 'pending', criadoEm: new Date().toISOString() };
     transactions.unshift(tx);
     if (typeof firebase !== 'undefined') {
-      firebase.firestore().collection(`tenants/${tenantId}/transactions`).doc(tx.id).set(tx).catch(() => {});
+      NEXIA.db ?NEXIA.db.collection(`tenants/${tenantId}/transactions`).doc(tx.id).set(tx).catch(() => {});
     }
 
     if (selectedPayMethod === 'pix') showPixModal(valor);
@@ -515,7 +515,7 @@ function copyPix() {
 async function loadDashboard() {
   if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) { renderDashboardFallback(); return; }
   try {
-    const snap = await firebase.firestore().collection(`tenants/${tenantId}/transactions`).orderBy('criadoEm','desc').limit(5).get();
+    const snap = await NEXIA.db ?NEXIA.db.collection(`tenants/${tenantId}/transactions`).orderBy('criadoEm','desc').limit(5).get();
     transactions = snap.docs.map(d => ({id:d.id,...d.data()}));
     const total = transactions.reduce((s,t) => s + (t.valor||0), 0);
     document.getElementById('mVolume').textContent = `R$ ${total.toFixed(0)}`;
@@ -596,7 +596,7 @@ function refundTx(id) {
 function saveSplit() { toast('✅ Configuração de split salva!'); }
 
 async function getToken() {
-  try { return await firebase.auth().currentUser?.getIdToken(); } catch(e) { return ''; }
+  try { return await (NEXIA.auth ? NEXIA.auth.currentUser : null)?.getIdToken(); } catch(e) { return ''; }
 }
 
 function toast(msg) {
@@ -617,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // FIX: aguarda Firebase inicializar antes de executar (evita "No Firebase App")
   const _boot = () => {
   if (typeof firebase !== 'undefined') {
-    firebase.auth().onAuthStateChanged(user => {
+    NEXIA.auth.onAuthStateChanged(user => {
       if (!user) { window.location.href = '/login.html'; return; }
       loadDashboard();
     
@@ -632,7 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 /* ═══ authFetch — envia token Firebase em TODOS os requests /api ═══ */
 async function authFetch(url, options = {}) {
-  const user = firebase.auth().currentUser;
+  const user = (NEXIA.auth ? NEXIA.auth.currentUser : null);
   if (!user) {
     window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
     return null;

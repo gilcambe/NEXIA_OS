@@ -489,8 +489,8 @@ function initStore() {
       }, () => {});
 
       // Carregar módulos instalados
-      if (firebase.auth().currentUser) {
-        const uid = firebase.auth().currentUser.uid;
+      if ((NEXIA.auth ? NEXIA.auth.currentUser : null)) {
+        const uid = (NEXIA.auth ? NEXIA.auth.currentUser : null).uid;
         db.collection('users').doc(uid).onSnapshot(snap => {
           const data = snap.data();
           installedIds = data?.modules_enabled || data?.modulesInstalled || [];
@@ -694,10 +694,10 @@ async function processPayment() {
     renderStep(4);
   } catch(e) {
     // Fallback: ativar módulo diretamente (trial)
-    if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
+    if (typeof firebase !== 'undefined' && (NEXIA.auth ? NEXIA.auth.currentUser : null)) {
       try {
-        const uid = firebase.auth().currentUser.uid;
-        await firebase.firestore().collection('users').doc(uid).set({
+        const uid = (NEXIA.auth ? NEXIA.auth.currentUser : null).uid;
+        await NEXIA.db ?NEXIA.db.collection('users').doc(uid).set({
           modules_enabled: firebase.firestore.FieldValue.arrayUnion(selectedModule.id)
         }, { merge: true });
         installedIds.push(selectedModule.id);
@@ -711,7 +711,7 @@ async function processPayment() {
 
 async function getToken() {
   try {
-    return await firebase.auth().currentUser?.getIdToken();
+    return await (NEXIA.auth ? NEXIA.auth.currentUser : null)?.getIdToken();
   } catch(e) { return ''; }
 }
 
@@ -781,7 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const _boot = () => {
   // Auth check
   if (typeof firebase !== 'undefined') {
-    firebase.auth().onAuthStateChanged(user => {
+    NEXIA.auth.onAuthStateChanged(user => {
       if (!user) { window.location.href = '/login.html'; return; }
       initStore();
     
@@ -816,7 +816,7 @@ function nxToggleTheme() {
 <script>
 /* ═══ authFetch — envia token Firebase em TODOS os requests /api ═══ */
 async function authFetch(url, options = {}) {
-  const user = firebase.auth().currentUser;
+  const user = (NEXIA.auth ? NEXIA.auth.currentUser : null);
   if (!user) {
     window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
     return null;

@@ -256,6 +256,11 @@ footer{border-top:1px solid var(--border2);padding:48px clamp(20px,5vw,80px);bac
   };
 })();
 </script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="/core/nexia-boot.js"></script>
+  <script src="/core/auth.js"></script>
   <script src="/core/nav-guard.js"></script>
 </head> 
 <body> 
@@ -693,14 +698,9 @@ function setLang(lang){
 </div> 
  
 <!-- Firebase Compat (unificado) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <!-- FIX: config.js ausente causava window.NEXIA undefined → nexia:false no Playwright -->
-<script src="/core/nexia-boot.js"></script>
 <script src="/core/nexia-theme.js"></script>
 <script src="/core/nexia-i18n.js"></script>
-<script src="/core/auth.js"></script>
 <script>
 (function(){
   // ── Firebase Config — lido de window.NEXIA_FIREBASE_CONFIG (core/config.js)

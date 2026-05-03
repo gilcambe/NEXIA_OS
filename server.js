@@ -310,9 +310,9 @@ async function runFunction(fnName, req, res, body, isSchedule) {
     res.writeHead(status, headers);
     res.end(result.body || '');
   } catch (e) {
-    console.error('[FN ERROR]', fnName, err.message, err.stack ? err.stack.split('\n').slice(0,3).join(' | ') : '');
+    console.error('[FN ERROR]', fnName, e.message, e.stack ? e.stack.split('\n').slice(0,3).join(' | ') : '');
     res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(req.headers) });
-    res.end(JSON.stringify({ error: 'Function error', detail: err.message }));
+    res.end(JSON.stringify({ error: 'Function error', detail: e.message }));
   }
 }
 

@@ -254,10 +254,16 @@ body { width: 100%; display: flex; align-items: center; justify-content: center;
   };
 })();
 </script>
-  <script src="/core/nav-guard.js"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../nexia-design-system.css">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="/core/nexia-boot.js"></script>
+  <script src="/core/auth.js"></script>
+  <script src="/core/bridge.js"></script>
+  <script src="/core/nav-guard.js"></script>
 </head>
 <body>
 <div id="shell">
@@ -494,12 +500,6 @@ body { width: 100%; display: flex; align-items: center; justify-content: center;
 </div>
 
 <div id="pax-toast"></div>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="/core/nexia-boot.js"></script>
-<script src="/core/auth.js"></script><script src="/core/bridge.js"></script>
 <script>
 'use strict';
 const VP_SLUG = 'viajante-pro';
@@ -606,14 +606,14 @@ function panicAlert() {
 // ── Auth + dados do passageiro ────────────────────────────────────
 // P4 FIX: Auth guard + role check — requer user autenticado com role 'passenger'
 function _vpPassengerGuard(callback) {
-  firebase.auth().onAuthStateChanged(async user => {
+  NEXIA.auth.onAuthStateChanged(async user => {
     if (!user) {
       window.location.href = '../login.html?redirect=' + encodeURIComponent(location.pathname);
       return;
     }
     // Verificar role no Firestore
     try {
-      const snap = await firebase.firestore().collection('users').doc(user.uid).get();
+      const snap = await NEXIA.db ?NEXIA.db.collection('users').doc(user.uid).get();
       const profile = snap.exists ? snap.data() : {};
       const role = profile.role || profile.tenantRole || '';
       if (role !== 'passenger' && role !== 'admin' && role !== 'master') {

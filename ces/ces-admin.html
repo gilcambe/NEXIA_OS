@@ -502,7 +502,7 @@ textarea.fi{resize:vertical;min-height:80px}
         <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="user-nm">Admin CES</div>
         <div style="font-size:10px;color:var(--text3)">ces · admin</div>
       </div>
-      <button class="ab r" onclick="firebase&&firebase.auth?firebase.auth().signOut().then(()=>window.location.href='/login'):window.location.href='/login'" title="Sair" aria-label="Sair"><i class="ri-logout-box-line"></i></button>
+      <button class="ab r" onclick="firebase&&firebase.auth?NEXIA.auth.signOut().then(()=>window.location.href='/login'):window.location.href='/login'" title="Sair" aria-label="Sair"><i class="ri-logout-box-line"></i></button>
     </div>
   </div>
 </aside>
@@ -1680,9 +1680,9 @@ async function genMatches() {
   try {
     // Carrega inscritos e investidores do Firestore
     const [inscritosSnap, investSnap] = await Promise.all([
-      firebase.firestore().collection('tenants').doc('ces').collection('inscritos')
+      NEXIA.db ?NEXIA.db.collection('tenants').doc('ces').collection('inscritos')
         .where('perfil', '==', 'startup').limit(30).get().catch(() => ({docs:[]})),
-      firebase.firestore().collection('tenants').doc('ces').collection('inscritos')
+      NEXIA.db ?NEXIA.db.collection('tenants').doc('ces').collection('inscritos')
         .where('perfil', '==', 'investidor').limit(30).get().catch(() => ({docs:[]}))
     ]);
 
@@ -1708,11 +1708,11 @@ async function genMatches() {
 
     // Salva matches no Firestore
     if(startups.length && investidores.length) {
-      const batch = firebase.firestore().batch();
+      const batch = NEXIA.db ?NEXIA.db.batch();
       // Cria matches básicos se CORTEX não retornou estruturado
       const matchCount = Math.min(startups.length, investidores.length, 12);
       for(let i = 0; i < matchCount; i++) {
-        const ref = firebase.firestore().collection('tenants').doc('ces').collection('matches').doc();
+        const ref = NEXIA.db ?NEXIA.db.collection('tenants').doc('ces').collection('matches').doc();
         batch.set(ref, {
           startupId: startups[i].id, startupName: startups[i].nome||startups[i].name||'',
           investorId: investidores[i].id, investorName: investidores[i].nome||investidores[i].name||'',
@@ -2046,7 +2046,7 @@ async function salvarConfiguracoes() {
     if(key) config[key] = el.type==='checkbox' ? el.checked : el.value;
   });
   try {
-    await firebase.firestore().collection('tenant_settings').doc(TENANT).set(
+    await NEXIA.db ?NEXIA.db.collection('tenant_settings').doc(TENANT).set(
       { config, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
       { merge: true }
     );
@@ -2060,7 +2060,7 @@ async function salvarConfiguracoes() {
 <script>
 /* ═══ authFetch — envia token Firebase em TODOS os requests /api ═══ */
 async function authFetch(url, options = {}) {
-  const user = firebase.auth().currentUser;
+  const user = (NEXIA.auth ? NEXIA.auth.currentUser : null);
   if (!user) {
     window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
     return null;

@@ -228,12 +228,6 @@
 
 </style>
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="/core/nexia-boot.js"></script>
-<script src="/core/auth.js"></script>
-<script src="/core/nav-guard.js"></script>
 <script>
   // FIX v19: auth padronizada via NexiaAuth (igual a todas as outras páginas internas)
   document.documentElement.style.visibility = 'hidden';
@@ -250,7 +244,7 @@
       NexiaAuth.requireAuth('/login');
     } else {
       // Fallback robusto caso config.js/auth.js não carreguem
-      firebase.auth().onAuthStateChanged(function(u) {
+      NEXIA.auth.onAuthStateChanged(function(u) {
         if (!u) window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
         else { document.documentElement.style.visibility = 'visible'; document.body.style.visibility = 'visible'; }
       });
@@ -320,6 +314,12 @@ input::placeholder,textarea::placeholder { color: var(--text3) !important; }
 
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="/core/nexia-boot.js"></script>
+  <script src="/core/auth.js"></script>
+  <script src="/core/nav-guard.js"></script>
 </head>
 <body>
 
@@ -1191,8 +1191,8 @@ Seja direto e técnico. Responda em português.`;
 
   try {
     // v52: proxy via server para evitar CORS (Anthropic bloqueia chamadas diretas do browser)
-    const _qaTok = (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length && firebase.auth().currentUser)
-      ? await firebase.auth().currentUser.getIdToken().catch(() => 'demo')
+    const _qaTok = (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length && (NEXIA.auth ? NEXIA.auth.currentUser : null))
+      ? await (NEXIA.auth ? NEXIA.auth.currentUser : null).getIdToken().catch(() => 'demo')
       : 'demo';
     const res = await fetch('/api/cortex', {
       method:'POST',

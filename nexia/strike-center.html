@@ -8,9 +8,6 @@
 <title>Strike Center — NEXIA OS</title>
 <!-- Firebase Compat (obrigatório) -->
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <link rel="stylesheet" href="/core/nexia-theme.css">
 <link rel="stylesheet" href="/nexia/nexia-design-system.css">
 <style>
@@ -144,6 +141,12 @@ code{background:rgba(200,169,110,.1);padding:2px 6px;border-radius:4px;font-size
 
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="/core/nexia-boot.js"></script>
+  <script src="/core/auth.js"></script>
+  <script src="/core/nav-guard.js"></script>
 </head>
 <body>
 <div class="nx-layout">
@@ -292,7 +295,7 @@ code{background:rgba(200,169,110,.1);padding:2px 6px;border-radius:4px;font-size
               <div class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-title">Criar App no Meta</div><div class="step-desc">developers.facebook.com → Criar App → Tipo: Negócios</div><a href="https://developers.facebook.com" target="_blank" class="official-link">→ Abrir</a></div></div>
               <div class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-title">Token com ads_management</div><div class="step-desc">App → Explorador de Grafo → Gerar Token com permissão ads_management</div></div></div>
               <div class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-title">ID da conta de anúncios</div><div class="step-desc">business.facebook.com → Contas de anúncios → ID (ex: act_123456)</div></div></div>
-              <div class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Variáveis no Netlify</div><div class="step-desc"><code>META_ADS_TOKEN</code> e <code>META_AD_ACCOUNT_ID</code></div></div></div>
+              <div class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Variáveis no Render</div><div class="step-desc"><code>META_ADS_TOKEN</code> e <code>META_AD_ACCOUNT_ID</code></div></div></div>
             </div>
           </div>
         </div>
@@ -311,7 +314,7 @@ code{background:rgba(200,169,110,.1);padding:2px 6px;border-radius:4px;font-size
               <div class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-title">Developer Token</div><div class="step-desc">ads.google.com → Ferramentas → Centro de API</div><a href="https://developers.google.com/google-ads/api/docs/start" target="_blank" class="official-link">→ Docs</a></div></div>
               <div class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-title">OAuth 2.0</div><div class="step-desc">console.cloud.google.com → Credenciais → OAuth 2.0</div></div></div>
               <div class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-title">Refresh Token</div><div class="step-desc">OAuth Playground do Google</div><a href="https://developers.google.com/oauthplayground" target="_blank" class="official-link">→ OAuth Playground</a></div></div>
-              <div class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Variáveis no Netlify</div><div class="step-desc"><code>GOOGLE_ADS_DEVELOPER_TOKEN</code> <code>GOOGLE_ADS_CLIENT_ID</code> <code>GOOGLE_ADS_CLIENT_SECRET</code> <code>GOOGLE_ADS_REFRESH_TOKEN</code> <code>GOOGLE_ADS_CUSTOMER_ID</code></div></div></div>
+              <div class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Variáveis no Render</div><div class="step-desc"><code>GOOGLE_ADS_DEVELOPER_TOKEN</code> <code>GOOGLE_ADS_CLIENT_ID</code> <code>GOOGLE_ADS_CLIENT_SECRET</code> <code>GOOGLE_ADS_REFRESH_TOKEN</code> <code>GOOGLE_ADS_CUSTOMER_ID</code></div></div></div>
             </div>
           </div>
         </div>
@@ -351,10 +354,6 @@ code{background:rgba(200,169,110,.1);padding:2px 6px;border-radius:4px;font-size
     </div>
   </div>
 </div>
-
-<script src="/core/nexia-boot.js"></script>
-<script src="/core/auth.js"></script>
-<script src="/core/nav-guard.js"></script>
 <script>
 NexiaAuth.requireAuth();
 let tenantId=null, selectedPlatform=null;
@@ -378,7 +377,7 @@ function showAds(name,btn){
   if(btn)btn.classList.add('active');
 }
 
-async function getToken(){const u=firebase.auth().currentUser;return u?await u.getIdToken():null;}
+async function getToken(){const u=(NEXIA.auth ? NEXIA.auth.currentUser : null);return u?await u.getIdToken():null;}
 async function api(ep,body){
   const token=await getToken();
   const r=await fetch('/api/'+ep,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({...body,tenantId})});
@@ -609,10 +608,10 @@ async function removePool(profileId){
   try{await api('strike',{action:'remove_pool_profile',profileId});nxToast('Perfil removido','ok');loadPool();}catch(e){nxToast('Erro: '+e.message,'err');}
 }
 
-firebase.auth().onAuthStateChanged(async user=>{
+NEXIA.auth.onAuthStateChanged(async user=>{
   if(!user)return;
   try{
-    const snap=await firebase.firestore().collection('users').doc(user.uid).get();
+    const snap=await NEXIA.db ?NEXIA.db.collection('users').doc(user.uid).get();
     if(snap.exists)tenantId=snap.data().tenantSlug||null;
     loadStrikes();
   }catch(e){}

@@ -396,7 +396,7 @@ function startInterval() {
         startInterval();
       });
     } else if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-      firebase.auth().onAuthStateChanged(u => {
+      NEXIA.auth.onAuthStateChanged(u => {
         if (!u) { window.location.href = '/login'; return; }
         addLog('INFO', 'Autenticado via Firebase — iniciando...');
         refresh();
